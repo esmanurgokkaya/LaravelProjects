@@ -1,61 +1,265 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <a href="https://laravel.com" target="_blank">
+    <img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo">
+  </a>
 </p>
 
-## About Laravel
+# Laravel 12 Blog Projesi – Görev Bazlı Uygulama
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Bu proje, Laravel 12 kullanılarak hazırlanmış bir blog uygulamasıdır. Aşağıda adım adım görevler (`TASK`) ve kod örnekleri ile birlikte anlatılmıştır.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## ✅ TASK 1 – Laravel Kurulumu ve View Gösterimi
 
-## Learning Laravel
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+* Laravel kurulumu
+* Controller → View yönlendirmesi
+* Layout sistemi
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+###   Laravel 12 Kurulumu
 
-## Laravel Sponsors
+```bash
+composer create-project laravel/laravel blog-proje
+cd blog-proje
+php artisan serve
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Layout Oluşturma
 
-### Premium Partners
+**resources/views/layouts/app.blade.php**
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```blade
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Laravel Görev Projesi</title>
+</head>
+<body>
+    <header><h2>Üst Menü / Layout Alanı</h2></header>
 
-## Contributing
+    <main>
+        @yield('content')
+    </main>
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+    <footer><small>Alt Bilgi</small></footer>
+</body>
+</html>
+```
+###  View Oluşturma
 
-## Code of Conduct
+**resources/views/anasayfa.blade.php**
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```blade
+@extends('layouts.app')
 
-## Security Vulnerabilities
+@section('content')
+    <h1>Bu Anasayfa</h1>
+@endsection
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+###  Controller Oluşturma
 
-## License
+**app/Http/Controllers/AnasayfaController.php**
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+class AnasayfaController extends Controller
+{
+    public function index()
+    {
+        return view('anasayfa');
+    }
+}
+```
+
+###  Route Oluşturma
+
+**routes/web.php**
+
+```php
+use App\Http\Controllers\AnasayfaController;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', [AnasayfaController::class, 'index'])->name('anasayfa');
+```
+
+---
+
+## ✅ TASK 2 – Blog Modeli ve Blogları Listeleme
+Bu görevde Blog isminde bir model ve migration dosyası oluşturduk. Veritabanından tüm blogları çekerek view dosyasına blog::all() ile aktardık. View içerisinde verileri @foreach ile tablo halinde listeledik.
+###  Migration
+
+**database/migrations/2025_07_15_123538_create_blogs_table.php**
+
+```php
+Schema::create('blogs', function (Blueprint $table) {
+    $table->id();
+    $table->string('title');
+    $table->text('content');
+    $table->timestamps();
+});
+```
+
+###  Seeder
+
+**database/seeders/BlogSeeder.php**
+
+```php
+class BlogSeeder extends Seeder
+{
+    public function run()
+    {
+        Blog::create([
+            'title' => 'İlk Blog Yazısı',
+            'content' => 'Bu içerik seed ile eklendi.'
+        ]);
+    }
+}
+```
+
+###  Controller
+
+**app/Http/Controllers/BlogController.php**
+
+```php
+public function index()
+{
+    $blogs = Blog::all();
+    return view('blogs.index', compact('blogs'));
+}
+```
+
+### View
+
+**resources/views/blogs/index.blade.php** 
+
+```php
+@extends('layouts.app')
+
+@section('title', 'Blog Listesi')
+
+@section('content')
+    <h2>Blog Listesi</h2>
+
+    @if(session('success'))
+        <div style="color:green;">{{ session('success') }}</div>
+    @endif
+
+    <a href="{{ route('bloglar.create') }}">Yeni Blog Oluştur</a>
+
+    <table id="bloglarTable" border="1" cellpadding="10" cellspacing="0">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Başlık</th>
+                <th>İçerik</th>
+                <th>İşlemler</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($blogs as $blog)
+                <tr>
+                    <td>{{ $blog->id }}</td>
+                    <td>{{ $blog->title }}</td>
+                    <td>{{ \Illuminate\Support\Str::limit($blog->content, 50) }}</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+    <!-- Datatables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#bloglarTable').DataTable();
+        });
+    </script>
+@endsection
+
+```
+
+### Route
+
+```php
+Route::resource('bloglar', BlogController::class)->parameters([
+    'bloglar' => 'blog'
+]);
+```
+
+---
+
+##  ✅ TASK 3 – CRUD + Oturum (Breeze)
+Bu adımda blog için:
+Oturum işlemleri,
+Oluşturma (create),
+Listeleme (index + datatable),
+Güncelleme (edit),
+Silme (delete)
+fonksiyonlarını yazdık. Tüm işlemler için gerekli view dosyaları ve formlar hazırlandı.
+
+###  Breeze Kurulumu
+
+```bash
+composer require laravel/breeze --dev
+php artisan breeze:install
+npm install
+npm run dev
+php artisan migrate
+```
+
+### View Dosyaları
+
+* **create.blade.php**: Blog oluşturma formu
+[create blog view kodları](https://github.com/esmanurgokkaya/LaravelProjects/blob/main/resources/views/blogs/create.blade.php "create blog view kodları")
+
+* **edit.blade.php**: Blog düzenleme formu
+[edit blog view kodları](https://github.com/esmanurgokkaya/LaravelProjects/blob/main/resources/views/blogs/edit.blade.php "edit view kodları")
+
+* **index.blade.php**: Listeleme + düzenle/sil butonları
+[index blog view kodları](https://github.com/esmanurgokkaya/LaravelProjects/blob/main/resources/views/blogs/index.blade.php "index view kodları")
+
+\[Tüm kodlar yukarıdaki linklerde detaylı olarak bulunmaktadır.]
+
+### Controller CRUD Metotları
+
+* `create()`
+* `store()`
+* `edit()`
+* `update()`
+* `destroy()`
+
+[blog contoller kodları](https://github.com/esmanurgokkaya/LaravelProjects/blob/main/app/Http/Controllers/BlogController.php "blog contoller kodları")
+
+\[Tüm kodlar yukarıdaki linkte detaylı olarak bulunmaktadır.]
+###  Route - Auth ile Koruma
+
+**routes/web.php**
+
+```php
+Route::middleware(['auth'])->group(function () {
+    Route::resource('bloglar', BlogController::class)->parameters([
+        'bloglar' => 'blog'
+    ]);
+
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+require __DIR__.'/auth.php';
+```
+
+---
